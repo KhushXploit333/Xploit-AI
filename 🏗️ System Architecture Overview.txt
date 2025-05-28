@@ -1,0 +1,11 @@
+User (Browser)
+   │
+   ▼
+Frontend (HTML/JS + Chat Interface)
+   │
+   ▼
+Backend (Flask or FastAPI)
+   ├── Scan Engine ( OWASP TOP 10,< XSS, SQLi, etc.>)
+   ├── AI Module (GPT/OpenAI API)
+   ├── CVSS Calculator
+   └── Report Generator

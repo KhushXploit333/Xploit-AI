@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xploit AI: AI-Powered Web Pentest Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for the skull icon or specific elements */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a202c; /* Dark background */
+            color: #e2e8f0; /* Light text */
+        }
+        .chat-message {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            margin-bottom: 10px;
+        }
+        .user-message {
+            background-color: #4a5568; /* Darker gray for user messages */
+            align-self: flex-end; /* Align to the right */
+            margin-left: auto; /* Push to the right */
+        }
+        .ai-message {
+            background-color: #2d3748; /* Slightly lighter gray for AI messages */
+            align-self: flex-start; /* Align to the left */
+        }
+        .chat-container {
+            height: calc(100vh - 120px); /* Adjust height based on header/footer */
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+        /* Skull icon styling */
+        .skull-icon {
+            display: inline-block;
+            font-size: 2rem; /* Adjust size as needed */
+            margin-right: 10px;
+            color: #38b2ac; /* Teal color for a techy look */
+            animation: pulse 2s infinite ease-in-out; /* Simple pulse animation */
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+    <header class="bg-gray-800 p-4 shadow-md flex items-center justify-center">
+        <span class="skull-icon">💀</span>
+        <h1 class="text-3xl font-bold text-teal-400">Xploit AI</h1>
+        <p class="text-sm text-gray-400 ml-4">AI-Powered Web Pentest Assistant</p>
+    </header>
+
+    <main class="flex-grow container mx-auto p-6 flex flex-col md:flex-row gap-6">
+        <section class="bg-gray-700 p-6 rounded-lg shadow-lg flex flex-col w-full md:w-2/3">
+            <h2 class="text-2xl font-semibold mb-4 text-teal-300">AI Assistant Chat</h2>
+            <div id="chat-box" class="chat-container flex flex-col p-4 bg-gray-800 rounded-lg flex-grow mb-4">
+                <div class="chat-message ai-message">
+                    <p>Hello! I am Xploit AI, your AI-powered web pentest assistant. How can I help you today?</p>
+                </div>
+            </div>
+            <div class="flex">
+                <input type="text" id="user-input" placeholder="Ask me about a scan, vulnerability, or remediation..."
+                       class="flex-grow p-3 rounded-l-lg bg-gray-900 text-gray-200 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                <button id="send-button"
+                        class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-6 rounded-r-lg shadow-md transition duration-300 ease-in-out">
+                    Send
+                </button>
+            </div>
+            <div id="loading-indicator" class="text-center text-teal-400 mt-2 hidden">
+                <p>AI is thinking...</p>
+            </div>
+        </section>
+
+        <section class="bg-gray-700 p-6 rounded-lg shadow-lg w-full md:w-1/3">
+            <h2 class="text-2xl font-semibold mb-4 text-teal-300">Scan Results & Info</h2>
+            <div id="results-display" class="bg-gray-800 p-4 rounded-lg h-full overflow-y-auto text-sm">
+                <p class="text-gray-400">Scan results, CVSS scores, and other information will appear here.</p>
+                <p class="mt-2 text-gray-400">You can interact with the AI assistant to initiate scans or get more details.</p>
+                <div class="mt-4 p-3 bg-gray-900 rounded-md">
+                    <h3 class="font-bold text-teal-200">Latest Scan Summary:</h3>
+                    <p class="text-gray-300">Target: example.com</p>
+                    <p class="text-gray-300">Status: Pending</p>
+                    <p class="text-gray-300">Findings: None yet</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 p-4 text-center text-gray-400 text-sm mt-auto">
+        &copy; 2023 Xploit AI. All rights reserved.
+    </footer>
+
+    <script>
+        const chatBox = document.getElementById('chat-box');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+        const loadingIndicator = document.getElementById('loading-indicator');
+
+        // Function to scroll chat to bottom
+        function scrollToBottom() {
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // Function to add message to chat box
+        function addMessage(sender, message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('chat-message');
+            if (sender === 'user') {
+                messageDiv.classList.add('user-message');
+            } else {
+                messageDiv.classList.add('ai-message');
+            }
+            messageDiv.innerHTML = `<p>${message}</p>`;
+            chatBox.appendChild(messageDiv);
+            scrollToBottom();
+        }
+
+        // Function to send message to backend
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            if (message === '') return;
+
+            addMessage('user', message);
+            userInput.value = ''; // Clear input field
+            loadingIndicator.classList.remove('hidden'); // Show loading indicator
+
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: message }),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to get response from AI.');
+                }
+
+                const data = await response.json();
+                addMessage('ai', data.response);
+            } catch (error) {
+                console.error('Error sending message:', error);
+                addMessage('ai', `Error: ${error.message}. Please try again.`);
+            } finally {
+                loadingIndicator.classList.add('hidden'); // Hide loading indicator
+            }
+        }
+
+        // Event listeners
+        sendButton.addEventListener('click', sendMessage);
+        userInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Initial scroll to bottom
+        scrollToBottom();
+    </script>
+</body>
+</html>
