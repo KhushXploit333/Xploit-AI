@@ -1,5 +1,5 @@
 #💀 Xploit AI: AI-Powered Web Pentest Assistant
-
+An intelligent web pentesting tool that automates OWASP Top 10 vulnerability detection and provides real-time remediation guidance using AI.
 
 #🔐 Project Vision
 "Xploit AI" aims to revolutionize web penetration testing by integrating artificial intelligence and machine learning to automate the detection of common web vulnerabilities. The goal is to create an intelligent assistant that not only identifies security flaws but also guides security professionals through the testing process, offering real-time insights and actionable remediation advice. This tool will significantly reduce the manual effort and expertise required for initial vulnerability assessments, allowing pentesters to focus on more complex, nuanced threats.
